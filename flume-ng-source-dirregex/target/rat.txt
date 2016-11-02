@@ -1,0 +1,236 @@
+
+*****************************************************
+Summary
+-------
+Notes: 0
+Binaries: 0
+Archives: 0
+Standards: 8
+
+Apache Licensed: 4
+Generated Documents: 0
+
+JavaDocs are generated and so license header is optional
+Generated files do not required license headers
+
+4 Unknown Licenses
+
+*******************************
+
+Unapproved licenses:
+
+  src/main/java/com/changhong/bigdata/flume/source/dirnginx/NginxSource.java
+  src/main/java/com/jackniu/SpoolSource.java
+  src/main/java/com/jackniu/Test.java
+  src/main/java/com/jackniu/TestEventSource.java
+
+*******************************
+
+Archives:
+
+*****************************************************
+  Files with Apache License headers will be marked AL
+  Binary files (which do not require AL headers) will be marked B
+  Compressed archives will be marked A
+  Notices, licenses etc will be marked N
+  AL    pom.xml
+ !????? src/main/java/com/changhong/bigdata/flume/source/dirnginx/NginxSource.java
+  AL    src/main/java/com/changhong/bigdata/flume/source/dirregex/DirRegexSource.java
+ !????? src/main/java/com/jackniu/SpoolSource.java
+ !????? src/main/java/com/jackniu/Test.java
+ !????? src/main/java/com/jackniu/TestEventSource.java
+  AL    src/test/java/com/changhong/bigdata/flume/source/dirregex/test/TestDirRegexSource.java
+  AL    src/test/java/com/changhong/bigdata/flume/source/dirregex/test/TmpTest.java
+ 
+ *****************************************************
+ Printing headers for files without AL header...
+ 
+ 
+ =======================================================================
+ ==src/main/java/com/changhong/bigdata/flume/source/dirnginx/NginxSource.java
+ =======================================================================
+package com.changhong.bigdata.flume.source.dirnginx;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.flume.ChannelException;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.EventDrivenSource;
+import org.apache.flume.conf.Configurable;
+import org.apache.flume.event.EventBuilder;
+import org.apache.flume.instrumentation.SourceCounter;
+import org.apache.flume.source.AbstractSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
+
+
+/**
+ * @ClassName:NginxSource
+ * @Decription:监控目录Nginx 目录，按字节数核对重启续�?.断点续传，正则匹配内容提取数据，正则匹配文件名，内存使用上限tolalMemory大于
+ * maxMemory�?0.4
+ * @author Niuwenchen
+ * @date 2016-10-26 15:00:00
+ * */
+
+public class NginxSource extends AbstractSource implements EventDrivenSource, Configurable{
+
+	private Logger logger= LoggerFactory.getLogger(NginxSource.class);
+	private File monitorDir,checkFile; 									// 监控目录
+	private Pattern monitorFilePattern, contentPattern;                 // 文件�?  文件内容
+//	private long delayTime;
+	private String charsetName;
+	private int batchSize;
+	private ScheduledExecutorService executor;
+
+ =======================================================================
+ ==src/main/java/com/jackniu/SpoolSource.java
+ =======================================================================
+package com.jackniu;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.flume.Context;
+import org.apache.flume.CounterGroup;
+import org.apache.flume.Event;
+import org.apache.flume.client.avro.ReliableSpoolingFileEventReader;
+import org.apache.flume.conf.Configurable;
+import org.apache.flume.instrumentation.SourceCounter;
+import org.apache.flume.source.AbstractSource;
+import org.apache.flume.source.SpoolDirectorySource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+
+public class SpoolSource extends SpoolDirectorySource implements Configurable {
+	 private static Logger logger = LoggerFactory.getLogger(SpoolSource.class);
+	private String spoolDirectory;
+	private String completedSuffix; // 文件读取完毕的后�?
+//	private String fileHeader; // 是否在event的HEader中添加文件名
+//	private String fileHeaderKey;  // 这是event的Header中的key，value时文件名
+	private int batchSize;     //�?次处理的记录数目  默认�?100
+	
+//	private String inputCharset; // 编码方式，默认时UTF-8
+//	private String ignorePattern;  // 忽略复合物条件的文件�?
+//	private String trackerDirPath;  // 被处理文件元数据的存储目录，默认�?.flumespool
+
+ 	private CounterGroup counterGroup;
+ 	private ReliableSpoolingFileEventReader reader;
+	private SourceCounter sourceCount;
+ 	
+	@Override
+	public synchronized void configure(Context context) {
+		logger.info("**************Configure********************");
+		spoolDirectory=context.getString("spoolDir");
+		Preconditions.checkState(spoolDirectory!=null,
+				"Configuration must specity a apooling directory");
+		completedSuffix=context.getString("completedSuffix",".COMPLETED");
+		batchSize=context.getInteger("batchSize",100);
+		logger.info("***"+spoolDirectory+"  *****"+completedSuffix+"********"+batchSize);
+		sourceCount = getSourceCounter();
+		
+	}
+
+ =======================================================================
+ ==src/main/java/com/jackniu/Test.java
+ =======================================================================
+package com.jackniu;
+
+import com.google.gson.Gson;
+
+
+public class Test {
+	public static void main(String[] args)
+	{
+		Json json = new Json();
+		json.fileName = "/opt/flume";
+		json.logBody ="ip";
+		json.ip = "0.0.0.0";                                  // 但是这里的IP还是有点问题
+		Gson gson = new Gson();
+		String eventString = gson.toJson(json);
+		System.out.println(eventString.toString());
+	}
+	
+}
+class Json{
+	String fileName;    // 业务名称
+	String logBody ;    // 日志�?
+	String ip;
+}
+
+ =======================================================================
+ ==src/main/java/com/jackniu/TestEventSource.java
+ =======================================================================
+package com.jackniu;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.flume.ChannelException;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.EventDrivenSource;
+import org.apache.flume.conf.Configurable;
+import org.apache.flume.event.EventBuilder;
+import org.apache.flume.instrumentation.SourceCounter;
+import org.apache.flume.source.AbstractSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+
+public class TestEventSource extends AbstractSource implements EventDrivenSource, Configurable {
+	private Logger logger= LoggerFactory.getLogger(TestEventSource.class);
+	private File monitorDir,checkFile; // 监控目录
+	private int batchSize;
+	private ScheduledExecutorService executor;
+	private SourceCounter sourceCounter;
+	private int anchor=0;
+	private Properties properties;
+	private Properties tmpProperties = new Properties();
+	
+	
+	@Override
+	public void configure(Context context) {
+		logger.info("----------------------TestEventSource configure...");
+		String strMonitorDir = context.getString("monitorDir");
+		Preconditions.checkArgument(StringUtils.isNotBlank(strMonitorDir), "Missing Param:'monitorDir'");
+		batchSize = context.getInteger("batchSize");
+		Preconditions.checkArgument(batchSize > 0, "'batchSize' must be greater than 0");
+		
+		String strCheckFile = context.getString("checkFile");

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Built-By: JackNiu
+Build-Jdk: 1.8.0_101
+Specification-Title: flume-ng-source-dirregex
+Specification-Version: 1.6.0
+Specification-Vendor: Apache Software Foundation
+Implementation-Title: flume-ng-source-dirregex
+Implementation-Version: 1.6.0
+Implementation-Vendor-Id: org.apache.flume
+Implementation-Vendor: Apache Software Foundation
+Created-By: Maven Integration for Eclipse
+
